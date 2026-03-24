@@ -32,7 +32,7 @@ MODEL_URLS = {
     "ta_IN-tamil_female-medium.onnx": "https://huggingface.co/simrat39/tamil-piper-model/resolve/main/ta_IN-tamil_female-medium.onnx",
    
     # Community Kannada model
-    "kn_IN-kannada_male-medium.onnx": "https://huggingface.co/Bheemappa/Piper_Kannada/resolve/main/kn_IN-kannada_male-medium.onnx",
+    "kn_IN-kannada_male-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/kn/kn_IN/kannada_male/medium/kn_IN-kannada_male-medium.onnx",
 }
 
 # Alternative URLs if primary fails
