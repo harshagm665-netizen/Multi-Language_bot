@@ -11,7 +11,7 @@ MODELS = {
     "English (US)": "en_US-amy-low.onnx",
     "English (India)": "en_IN-kavya-medium.onnx",
     "Hindi": "hi_IN-rohan-medium.onnx",
-    "Tamil": "ta_IN-tamil_female-medium.onnx",
+    "Tamil": "ta_IN-tamil_male-medium.onnx",
     "Malayalam": "ml_IN-meera-medium.onnx",
     "Kannada": "kn_IN-kannada_male-medium.onnx",
     "Telugu": "te_IN-maya-medium.onnx",
@@ -23,20 +23,19 @@ MODELS = {
 # Direct download URLs for each model
 MODEL_URLS = {
     # Official Piper voices
-    "en_US-amy-low.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/amy/low/en_US-amy-low.onnx",
-    "en_IN-kavya-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_IN/kavya/medium/en_IN-kavya-medium.onnx",
-    "hi_IN-rohan-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/hi/hi_IN/rohan/medium/hi_IN-rohan-medium.onnx",
-    "ml_IN-meera-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/ml/ml_IN/meera/medium/ml_IN-meera-medium.onnx",
-    "te_IN-maya-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/te/te_IN/maya/medium/te_IN-maya-medium.onnx",
-    "mr_IN-google-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/mr/mr_IN/google/medium/mr_IN-google-medium.onnx",
-    "es_ES-sharvard-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/es/es_ES/sharvard/medium/es_ES-sharvard-medium.onnx",
-    "fr_FR-siwis-low.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/fr/fr_FR/siwis/low/fr_FR-siwis-low.onnx",
+    "en_US-amy-low.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/en_US-amy-low.onnx",
+    "en_IN-kavya-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_IN/en_IN-kavya-medium.onnx",
+    "hi_IN-rohan-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/main/hi/hi_IN/hi_IN-rohan-medium/hi_IN-rohan-medium.onnx",
+    "ml_IN-meera-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ml/ml_IN/ml_IN-meera-medium/ml_IN-meera-medium.onnx",
+    "te_IN-maya-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/main/te/te_IN/te_IN-maya-medium/te_IN-maya-medium.onnx",
+    "mr_IN-google-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/main/mr/mr_IN/mr_IN-google-medium/mr_IN-google-medium.onnx",
+    "es_ES-sharvard-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_ES/sharvard/medium/es_ES-sharvard-medium.onnx",
+    "fr_FR-siwis-low.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/siwis/low/fr_FR-siwis-low.onnx",
+    "kn_IN-kannada_male-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/main/kn/kn_IN/kn_IN-kannada_male-medium/kn_IN-kannada_male-medium.onnx",
+    "ta_IN-tamil_male-medium.onnx": "https://huggingface.co/simrat39/piper-tts-tamil-male/resolve/main/ta_IN-tamil_male-medium.onnx",
    
-    # Community Tamil model (simrat39)
-    "ta_IN-tamil_female-medium.onnx": "https://huggingface.co/simrat39/tamil-piper-model/resolve/main/ta_IN-tamil_female-medium.onnx",
-   
-    # Community Kannada model
-    "kn_IN-kannada_male-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/kn/kn_IN/kannada_male/medium/kn_IN-kannada_male-medium.onnx",
+    # Fallback/Alternative Tamil models
+    "ta_IN-tamil_female-medium.onnx": "https://huggingface.co/simrat39/piper-tts-tamil-female/resolve/main/ta_IN-tamil_female-medium.onnx",
 }
 
 # Alternative URLs if primary fails

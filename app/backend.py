@@ -81,7 +81,7 @@ class VoiceAssistant:
             "English_India": "en_IN-kavya-medium.onnx",
             "Hindi": "hi_IN-rohan-medium.onnx",
             "Kannada": "kn_IN-kannada_male-medium.onnx",
-            "Tamil": "ta_IN-tamil_female-medium.onnx",
+            "Tamil": "ta_IN-tamil_male-medium.onnx",
             "Malayalam": "ml_IN-meera-medium.onnx",
             "Telugu": "te_IN-maya-medium.onnx",
             "Marathi": "mr_IN-google-medium.onnx",
@@ -1351,7 +1351,7 @@ class VoiceAssistant:
         elif has_hindi:
             model = "hi_IN-rohan-medium.onnx"
         elif has_tamil:
-            model = "ta_IN-tamil_female-medium.onnx"
+            model = "ta_IN-tamil_male-medium.onnx"
         elif has_kannada:
             model = "kn_IN-kannada_male-medium.onnx"
         elif has_malayalam:
