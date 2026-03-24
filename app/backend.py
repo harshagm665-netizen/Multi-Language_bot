@@ -61,7 +61,7 @@ class VoiceAssistant:
             "South English": "en_GB-southern_english_female-low.onnx",
             "Hindi": "hi_IN-pratham-medium.onnx",
             "Kannada": "kn_IN-dharwad-medium.onnx",
-            "Tamil": "ta_IN-periyar-medium.onnx",  # Requires manual download
+            "Tamil": "ta_IN-roja-medium.onnx",
             "Malayalam": "ml_IN-arjun-medium.onnx",
             "French": "fr_FR-siwis-low.onnx",
             "Spanish": "es_ES-carlfm-x_low.onnx"

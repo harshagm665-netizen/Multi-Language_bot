@@ -56,10 +56,23 @@ class VoiceAssistant:
         # self.OLLAMA_URL = "http://127.0.0.1:11434/api/generate"   # safest localhost URL
 
         # ---- PIPER MODEL ----
-        self.PIPER_MODEL = "/home/nova/Documents/Novabot/piper/models/en_US-amy-low.onnx"
+        self.language = "English"
+        self.language_code = "en"
+        self.language_models = {
+            "English": "en_US-amy-low.onnx",
+            "South English": "en_GB-southern_english_female-low.onnx",
+            "Hindi": "hi_IN-pratham-medium.onnx",
+            "Kannada": "kn_IN-dharwad-medium.onnx",
+            "Tamil": "ta_IN-roja-medium.onnx",
+            "Malayalam": "ml_IN-arjun-medium.onnx",
+            "French": "fr_FR-siwis-low.onnx",
+            "Spanish": "es_ES-carlfm-x_low.onnx"
+        }
+        
+        self.PIPER_MODEL = os.path.join("/home/nova/Documents/Novabot/piper/models", self.language_models[self.language])
 
         if not os.path.exists(self.PIPER_MODEL):
-            raise FileNotFoundError(f"Piper model missing: {self.PIPER_MODEL}")
+            print(f"⚠ Warning: Default Piper model missing: {self.PIPER_MODEL}")
 
         # Queues + state
         self.audio_q = queue.Queue(maxsize=50)
