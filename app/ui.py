@@ -1,28 +1,112 @@
 from kivy.app import App
+from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.gridlayout import GridLayout
 from kivy.clock import Clock
 from kivy.graphics import Color, Rectangle, Ellipse, InstructionGroup
 from kivy.core.window import Window
-from kivy.core.text import LabelBase
-from kivy.config import Config
 import random
 import threading
 from app.backend import VoiceAssistant
 
-# Fullscreen & dark blue background
+# Fullscreen & dark blue background settings
 Window.fullscreen = True
 
+class WelcomeScreen(Screen):
+    def __init__(self, on_start_callback, on_lang_change, **kwargs):
+        super().__init__(**kwargs)
+        self.on_start_callback = on_start_callback
+        self.on_lang_change = on_lang_change
+        self.selected_lang = "English"
 
-class KidsUI(FloatLayout):
+        with self.canvas.before:
+            Color(0.05, 0.05, 0.2, 1)  # Dark blue
+            self.rect = Rectangle(pos=(0,0), size=Window.size)
+        Window.bind(size=self.update_rect)
+
+        # Main Layout
+        layout = FloatLayout()
+
+        # Title
+        layout.add_widget(Label(
+            text="Novabot: Choose Your Language",
+            font_size='40sp',
+            bold=True,
+            pos_hint={"center_x": 0.5, "center_y": 0.85}
+        ))
+
+        # Language Grid
+        grid = GridLayout(cols=4, spacing=15, size_hint=(0.8, 0.4), pos_hint={"center_x": 0.5, "center_y": 0.5})
+        languages = [
+            "Hindi", "Kannada", "Tamil", "Malayalam", 
+            "French", "Spanish", "English", "South English"
+        ]
+        
+        self.lang_buttons = {}
+        for lang in languages:
+            btn = Button(
+                text=lang,
+                background_normal='',
+                background_color=(0.1, 0.4, 0.8, 1),
+                font_size='20sp',
+                bold=True
+            )
+            btn.bind(on_release=lambda instance, l=lang: self.select_language(l))
+            grid.add_widget(btn)
+            self.lang_buttons[lang] = btn
+
+        layout.add_widget(grid)
+
+        # Start Button
+        self.start_btn = Button(
+            text="START BOT",
+            size_hint=(0.3, 0.12),
+            pos_hint={"center_x": 0.5, "center_y": 0.2},
+            background_normal='',
+            background_color=(0, 0.8, 0.2, 1),
+            font_size='25sp',
+            bold=True
+        )
+        self.start_btn.bind(on_release=lambda x: self.on_start_callback())
+        layout.add_widget(self.start_btn)
+
+        # Exit Button
+        exit_btn = Button(
+            text="EXIT",
+            size_hint=(None, None),
+            size=(100, 50),
+            pos_hint={"right": 0.98, "top": 0.98},
+            background_color=(0.8, 0.1, 0.1, 1)
+        )
+        exit_btn.bind(on_release=lambda x: App.get_running_app().stop())
+        layout.add_widget(exit_btn)
+
+        self.add_widget(layout)
+
+    def update_rect(self, *args):
+        self.rect.size = Window.size
+
+    def select_language(self, lang):
+        self.selected_lang = lang
+        # Visual feedback
+        for l, btn in self.lang_buttons.items():
+            btn.background_color = (0.1, 0.4, 0.8, 1) # Reset
+        self.lang_buttons[lang].background_color = (1, 0.6, 0, 1) # Highlight
+        
+        # Notify backend
+        self.on_lang_change(lang)
+
+class MainAssistantScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.layout = FloatLayout()
 
         # --- Background ---
         with self.canvas.before:
-            Color(0.05, 0.05, 0.2, 1)  # Dark blue
+            Color(0.05, 0.05, 0.2, 1)
             self.bg_rect = Rectangle(pos=(0, 0), size=Window.size)
         Window.bind(size=self.update_bg)
 
@@ -33,162 +117,108 @@ class KidsUI(FloatLayout):
             "r": random.randint(10, 25),
             "speed": random.uniform(0.2, 0.8)
         } for _ in range(15)]
-        self.bubble_groups = []  # Store InstructionGroups instead of individual instructions
+        self.bubble_groups = []
 
-        # --- Mode label ---
-        self.mode_label = Label(
-            text="Listening...",
-            font_size=50,
-            color=(1, 1, 1, 1),
-            pos_hint={"center_x": 0.5, "center_y": 0.9}
-        )
-        self.add_widget(self.mode_label)
-        self.mode = "listen"
+        # --- Labels ---
+        self.mode_label = Label(text="Initializing...", font_size=50, pos_hint={"center_x": 0.5, "center_y": 0.8})
+        self.layout.add_widget(self.mode_label)
 
-        # Question box (background for the question)
-        self.question_frame = FloatLayout(size_hint=(None, None), size=(900, 100))
-        self.question_frame.pos_hint = {"center_x": 0.5, "y": 0.05}
-
-        # White background for the question box
+        # Question Frame
+        self.question_frame = FloatLayout(size_hint=(0.85, 0.15), pos_hint={"center_x": 0.5, "y": 0.08})
         with self.question_frame.canvas.before:
-            Color(1, 1, 1, 1)  # White background
-            self.question_bg = Rectangle(pos=self.question_frame.pos, size=self.question_frame.size)
+            Color(1, 1, 1, 1)
+            self.q_bg = Rectangle(pos=self.question_frame.pos, size=self.question_frame.size)
+        self.question_frame.bind(pos=self.update_q_bg, size=self.update_q_bg)
 
-        # Update rectangle when resized
-        self.question_frame.bind(pos=self.update_question_bg, size=self.update_question_bg)
-
-        # Question label (with large font size and centered text)
         self.question_label = Label(
-            text="",
-            font_size=45, 
-            color=(0, 0, 0, 1),  
-            size_hint=(None, None),
-            size=(900, 100),  
-            halign="center",  
-            valign="middle",  
-            text_size=(900, 100),  
+            text="", font_size=40, color=(0,0,0,1), halign="center", valign="middle",
+            size_hint=(1, 1), text_size=(800, 150)
         )
-
-        self.question_label.center_x = self.question_frame.center_x
-        self.question_label.center_y = self.question_frame.center_y
-
         self.question_frame.add_widget(self.question_label)
-        self.add_widget(self.question_frame)
+        self.layout.add_widget(self.question_frame)
+
+        # --- Navigation Buttons ---
+        nav_bar = BoxLayout(size_hint=(1, 0.08), pos_hint={"top": 1}, padding=10, spacing=Window.width - 250)
         
-        self.question_frame.bind(pos=self.update_question_bg, size=self.update_question_bg)
+        back_btn = Button(text="BACK", size_hint=(None, 1), width=100, background_color=(0.5, 0.5, 0.5, 1))
+        back_btn.bind(on_release=self.go_back)
+        
+        exit_btn = Button(text="EXIT", size_hint=(None, 1), width=100, background_color=(0.8, 0.1, 0.1, 1))
+        exit_btn.bind(on_release=lambda x: App.get_running_app().stop())
 
-        # --- Exit button ---
-        self.exit_btn = Button(
-            text="X",
-            size_hint=(None, None),
-            size=(50, 50),
-            pos_hint={"right": 0.98, "top": 0.98},
-            background_color=(1, 1, 1, 1),
-            color=(0, 0, 0, 1)
-        )
-        self.exit_btn.bind(on_release=self.close_app)
-        self.add_widget(self.exit_btn)
+        nav_bar.add_widget(back_btn)
+        nav_bar.add_widget(exit_btn)
+        self.layout.add_widget(nav_bar)
 
-        # --- Language Selection Bar ---
-        self.lang_bar = BoxLayout(
-            orientation='horizontal',
-            size_hint=(0.9, 0.08),
-            pos_hint={"center_x": 0.5, "center_y": 0.8},
-            spacing=10
-        )
-        languages = [
-            "Hindi", "Kannada", "Tamil", "Malayalam", 
-            "South English", "French", "Spanish", "English"
-        ]
-        for lang in languages:
-            btn = Button(
-                text=lang,
-                background_color=(0.2, 0.6, 1, 1),
-                color=(1, 1, 1, 1),
-                font_size=20,
-                bold=True
-            )
-            # Use a lambda that captures the current lang string
-            btn.bind(on_release=lambda instance, l=lang: self.change_lang(l))
-            self.lang_bar.add_widget(btn)
-        self.add_widget(self.lang_bar)
+        self.add_widget(self.layout)
+        Clock.schedule_interval(self.animate, 1/30)
 
-        # --- Backend ---
+    def update_bg(self, *args):
+        self.bg_rect.size = Window.size
+
+    def update_q_bg(self, instance, value):
+        self.q_bg.pos = instance.pos
+        self.q_bg.size = instance.size
+
+    def go_back(self, *args):
+        self.manager.transition = FadeTransition()
+        self.manager.current = 'welcome'
+
+    def animate(self, dt):
+        for grp in self.bubble_groups:
+            try: self.canvas.remove(grp)
+            except: pass
+        self.bubble_groups = []
+        for i, b in enumerate(self.bubbles):
+            grp = InstructionGroup()
+            grp.add(Color(0.63, 0.88, 1, 0.6))
+            grp.add(Ellipse(pos=(b["x"]-b["r"], b["y"]-b["r"]), size=(b["r"]*2, b["r"]*2)))
+            self.canvas.add(grp)
+            self.bubble_groups.append(grp)
+            b["y"] -= b["speed"]
+            if b["y"] + b["r"] < 0:
+                b["y"] = Window.height + b["r"]
+                b["x"] = random.randint(0, Window.width)
+
+class NovabotUI(ScreenManager):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.transition = FadeTransition()
+        
+        # Initialize Backend
         self.assistant = VoiceAssistant(
             on_listen=self.set_listen,
             on_speak=self.set_speak,
             on_question=self.display_question
         )
-        threading.Thread(target=self.start_voice_engine, daemon=True).start()
 
-        # --- Animation ---
-        Clock.schedule_interval(self.animate, 1/30)
+        # Create Screens
+        self.welcome = WelcomeScreen(name='welcome', 
+                                   on_start_callback=self.start_interaction,
+                                   on_lang_change=self.change_language)
+        self.main = MainAssistantScreen(name='interaction')
 
-    # --- Update background / question box ---
-    def update_bg(self, *args):
-        self.bg_rect.size = Window.size
+        self.add_widget(self.welcome)
+        self.add_widget(self.main)
 
-    def update_question_bg(self, instance, value):
-        self.question_bg.pos = instance.pos
-        self.question_bg.size = instance.size
+        # Thread for engine
+        threading.Thread(target=self.assistant.run, daemon=True).start()
 
-        self.question_label.center_x = instance.center_x
-        self.question_label.center_y = instance.center_y
+    def start_interaction(self):
+        self.current = 'interaction'
 
-    # --- Backend callbacks ---
-    def start_voice_engine(self):
-        self.assistant.run()
+    def change_language(self, lang):
+        self.assistant.set_language(lang)
 
     def set_listen(self):
-        self.mode = "listen"
-        self.mode_label.text = "Listening..."
-        self.question_label.text = ""  
+        self.main.mode_label.text = "Listening..."
+        self.main.question_label.text = ""
 
     def set_speak(self):
-        self.mode = "speak"
-        self.mode_label.text = "Speaking..."
+        self.main.mode_label.text = "Speaking..."
 
     def display_question(self, text):
-        self.question_label.text = text
-
-    def change_lang(self, lang_name):
-        """Update the assistant's language."""
-        if hasattr(self, "assistant"):
-            self.assistant.set_language(lang_name)
-
-    # --- Close app ---
-    def close_app(self, *args):
-        if hasattr(self, "assistant"):
-            self.assistant.running = False
-        App.get_running_app().stop()
-
-    # --- Animation loop ---
-    def animate(self, dt):
-        for grp in self.bubble_groups:
-            try:
-                self.canvas.remove(grp)
-            except Exception:
-                pass
-        self.bubble_groups = []
-
-        # Draw new bubbles
-        for bubble in self.bubbles:
-            grp = InstructionGroup()
-            grp.add(Color(0.63, 0.88, 1, 0.8))
-            grp.add(Ellipse(pos=(bubble["x"] - bubble["r"], bubble["y"] - bubble["r"]),
-                            size=(bubble["r"]*2, bubble["r"]*2)))
-            self.canvas.add(grp)
-            self.bubble_groups.append(grp)
-
-            bubble["y"] -= bubble["speed"]
-            if bubble["y"] + bubble["r"] < 0:
-                bubble["y"] = Window.height + bubble["r"]
-                bubble["x"] = random.randint(0, Window.width)
-
-
-class KidsApp(App):
-    def build(self):
-        return KidsUI()
+        self.main.question_label.text = text
 
 if __name__ == "__main__":
     KidsApp().run()
