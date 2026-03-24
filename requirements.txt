@@ -1,0 +1,13 @@
+vosk
+groq
+sounddevice
+numpy
+python-dotenv
+requests
+webrtcvad
+scipy
+pyserial
+beautifulsoup4
+pytrends
+yfinance
+kivy

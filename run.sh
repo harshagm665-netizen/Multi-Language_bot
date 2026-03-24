@@ -5,12 +5,23 @@
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$PROJECT_DIR" || { echo "❌ Error: Project directory not found"; exit 1; }
 
+# Ensure virtual environment exists
+if [ ! -d "venv" ]; then
+    echo "📦 Creating virtual environment..."
+    python3 -m venv venv
+fi
+
 # Activate virtual environment
-if [ -f "venv/bin/activate" ]; then
-    echo "🔗 Activating virtual environment..."
-    source venv/bin/activate
+echo "🔗 Activating virtual environment..."
+source venv/bin/activate
+
+# Install requirements
+if [ -f "requirements.txt" ]; then
+    echo "📥 Installing dependencies (this may take a minute)..."
+    pip install --upgrade pip
+    pip install -r requirements.txt
 else
-    echo "⚠️ Warning: venv not found. Attempting to run with system python3..."
+    echo "⚠️ Warning: requirements.txt not found!"
 fi
 
 # Run the app
