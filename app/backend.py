@@ -33,12 +33,35 @@ class VoiceAssistant:
         self.on_question = on_question
 
         # --- Load API Key ---
-        load_dotenv(os.path.join(PROJECT_ROOT, ".env"))
+        env_path = os.path.join(PROJECT_ROOT, ".env")
+        load_dotenv(env_path)
         self.api_key = os.getenv("GROQ_API_KEY", "").strip()
+        
+        # Manual fallback if load_dotenv fails
+        if not self.api_key and os.path.exists(env_path):
+            try:
+                with open(env_path, "r") as f:
+                    for line in f:
+                        if line.strip().startswith("GROQ_API_KEY="):
+                            self.api_key = line.split("=", 1)[1].strip().strip("'").strip('"')
+                            break
+            except Exception as e:
+                print(f"⚠ Manual .env read failed: {e}")
+
         if not self.api_key:
-            print(f"⚠ ERROR: GROQ_API_KEY missing in {os.path.join(PROJECT_ROOT, '.env')}")
+            print(f"⚠ ERROR: GROQ_API_KEY missing in {env_path}")
         else:
             print(f"✔ Groq API Key loaded (starts with {self.api_key[:4]}...)")
+
+        # --- Piper Executable Discovery ---
+        self.PIPER_EXE = os.path.join(PROJECT_ROOT, "piper", "piper")
+        if not os.path.exists(self.PIPER_EXE):
+            # Try build folder fallback
+            fallback = os.path.join(PROJECT_ROOT, "piper", "build", "piper")
+            if os.path.exists(fallback):
+                self.PIPER_EXE = fallback
+            else:
+                print(f"⚠ Warning: Piper executable not found at {self.PIPER_EXE} or {fallback}")
 
         # -------------------
         # Audio / model paths
@@ -800,7 +823,7 @@ class VoiceAssistant:
         Piper returns signed 16-bit LE PCM at 22050Hz by default with --output_raw.
         """
         piper_cmd = [
-            os.path.join(PROJECT_ROOT, "piper", "build", "piper"),  # binary path
+            self.PIPER_EXE,  # binary path (dynamic)
             "--model",
             self.PIPER_MODEL,                          # e.g., "models/en_US-amy-low.onnx"
             "--output_raw"                              # outputs raw audio (or use --output_file for WAV)
@@ -1238,7 +1261,7 @@ class VoiceAssistant:
         # Piper warm
         try:
             p = subprocess.Popen(
-                ["/home/nova/Documents/Novabot/piper/piper", "--model", self.PIPER_MODEL, "--output_raw"],
+                [self.PIPER_EXE, "--model", self.PIPER_MODEL, "--output_raw"],
                 stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
             )
             p.stdin.write(b"warmup")
