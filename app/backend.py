@@ -449,9 +449,7 @@ class VoiceAssistant:
 
         t = text.lower().strip()
 
-        #Reject non-English characters (allow a–z, numbers, spaces, basic punctuation)
-        if not re.fullmatch(r"[a-z0-9\s?.!,']+", t):
-            return ""
+        # (Removed restrictive English-only regex to allow multilingual script)
 
         # Filler words to ignore completely
         ignore_exact = {
@@ -482,8 +480,9 @@ class VoiceAssistant:
 
         #Reject questions with less than 5 words
         if t.endswith("?"):
-            letters_only = re.sub(r"[^a-z]", "", t)
-            if len(letters_only) < 3:
+            # Allow native script characters by excluding only spaces and basic punctuation
+            letters_only = re.sub(r"[\s?.!,']", "", t)
+            if len(letters_only) < 2:
                 return ""
 
         return text.strip()
@@ -1276,7 +1275,12 @@ class VoiceAssistant:
             "model": model_name,
             "stream": True,
             "messages": [
-                {"role": "system", "content": "You are Nova, a friendly female assistant. Keep responses short and cheerful. Respond in the same language as the user's question. If you use Hindi, Tamil, or Kannada, ensure the script is correct."},
+                {"role": "system", "content": "You are Nova, a friendly and helpful female assistant for children. "
+                                             "You must speak clearly and simply. "
+                                             "IMPORTANT: Always respond in the SAME language the user speaks to you. "
+                                             "If you speak in Hindi, Tamil, Kannada, or Malayalam, you MUST use the NATIVE SCRIPT (e.g., Devanagari for Hindi, Kannada script for Kannada). "
+                                             "NEVER use Romanized English (like 'Namaskara') for Indian languages. "
+                                             "Always use the actual script so the system can detect the language correctly."},
                 {"role": "user", "content": prompt}
             ]
         }

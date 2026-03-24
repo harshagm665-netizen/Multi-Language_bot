@@ -583,22 +583,14 @@ class VoiceAssistant:
 
         t = normalize_text(text)
 
-        # Allow only basic English characters
-        if not re.fullmatch(r"[a-z0-9\s?.!']+", t):
-            return ""
+        # (Removed restrictive English-only regex to allow multilingual script)
 
         # Common filler / noise phrases
         filler_phrases = {
             "oh", "ok", "okay", "hmm", "uh", "um", "umm", "huh",
-            "ha", "haa", "aah", "ohh", "mmm",
-            "so", "hmm hmm", "uh uh"
+            "ha", "haa", "aah", "ohh", "mmm"
         }
-
         greetings = {"hello", "hi", "hey", "hiya"}
-
-        # Reject pure filler
-        if t in filler_phrases:
-            return ""
 
         # Allow greetings explicitly
         if t in greetings:
@@ -608,7 +600,7 @@ class VoiceAssistant:
         t_words = t.split()
         if len(t_words) == 1:
             word = re.sub(r"[?.!]", "", t_words[0])
-            if word in filler_phrases or len(word) <= 3:
+            if word in {"oh", "ok", "okay", "hmm", "uh", "um", "umm", "huh", "ha", "haa", "aah", "ohh", "mmm", "so", "hmm hmm", "uh uh"} or len(word) <= 3:
                 return ""
 
         # Collapse repeated sentences like "what is? what is?"
@@ -633,8 +625,9 @@ class VoiceAssistant:
 
         # Reject very short questions like "ok?"
         if t.endswith("?"):
-            letters_only = re.sub(r"[^a-z]", "", t)
-            if len(letters_only) < 5:
+            # Allow native script characters by excluding only spaces and basic punctuation
+            letters_only = re.sub(r"[\s?.!,']", "", t)
+            if len(letters_only) < 2:
                 return ""
 
         # ✅ Return cleaned, stripped text
@@ -1643,12 +1636,14 @@ class VoiceAssistant:
                 # GENERAL LLM PROMPT
                 # -------------------------
             prompt = f"""
-            You are NOVA, a friendly female Indian medical teacher for children.
+            You are NOVA, a friendly and helpful female medical assistant.
+            
+            IMPORTANT: Always respond in the SAME language the user speaks to you. 
+            If you speak in Hindi, Tamil, Kannada, or Malayalam, you MUST use the NATIVE SCRIPT (e.g., Devanagari for Hindi, Kannada script for Kannada). 
+            NEVER use Romanized English (like 'Namaskara') for Indian languages.
+            Always use the actual script so the system can detect the language correctly.
 
             ABSOLUTE FIRST RULE (HIGHEST PRIORITY)
-            Before answering anything, you MUST decide:
-            Is the child’s question clearly and directly about HUMAN health or HUMAN medicine?
-
             If the answer is NO, you MUST immediately reply with EXACTLY:
             I can only help with medical and health related questions.
 

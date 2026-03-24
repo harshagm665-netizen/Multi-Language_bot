@@ -49,8 +49,9 @@ class MainAssistantScreen(Screen):
 
         self.question_label = Label(
             text="", font_size=40, color=(0,0,0,1), halign="center", valign="middle",
-            size_hint=(1, 1), text_size=(800, 150)
+            size_hint=(1, 1)
         )
+        self.question_label.bind(size=lambda s, w: setattr(s, 'text_size', w))
         self.question_frame.add_widget(self.question_label)
         self.layout.add_widget(self.question_frame)
 
