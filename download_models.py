@@ -1,0 +1,63 @@
+import os
+import requests
+import json
+
+# Configuration
+MODELS_DIR = "piper/models"
+os.makedirs(MODELS_DIR, exist_ok=True)
+
+# Language -> Model Filenames mapping
+MODELS = {
+    "English (US)": "en_US-amy-low.onnx",
+    "English (India)": "en_IN-gcount-medium.onnx",
+    "Hindi": "hi_IN-pratham-medium.onnx",
+    "Tamil": "ta_IN-periyar-medium.onnx",
+    "Malayalam": "ml_IN-arjun-medium.onnx",
+    "French": "fr_FR-siwis-low.onnx",
+    "Spanish": "es_ES-carlfm-x_low.onnx"
+}
+
+# Base URL for rhasspy piper voices
+BASE_URL = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0"
+
+# Specific language paths in the repo
+LANG_PATHS = {
+    "en_US-amy-low.onnx": "en/en_US/amy/low/en_US-amy-low.onnx",
+    "en_IN-gcount-medium.onnx": "en/en_IN/gcount/medium/en_IN-gcount-medium.onnx",
+    "hi_IN-pratham-medium.onnx": "hi/hi_IN/pratham/medium/hi_IN-pratham-medium.onnx",
+    "ta_IN-periyar-medium.onnx": "ta/ta_IN/periyar/medium/ta_IN-periyar-medium.onnx",
+    "ml_IN-arjun-medium.onnx": "ml/ml_IN/arjun/medium/ml_IN-arjun-medium.onnx",
+    "fr_FR-siwis-low.onnx": "fr/fr_FR/siwis/low/fr_FR-siwis-low.onnx",
+    "es_ES-carlfm-x_low.onnx": "es/es_ES/carlfm/x_low/es_ES-carlfm-x_low.onnx",
+}
+
+def download_file(url, dest):
+    if os.path.exists(dest):
+        print(f"Skipping {dest}, already exists.")
+        return
+    print(f"Downloading {url} to {dest}...")
+    r = requests.get(url, stream=True)
+    if r.status_code == 200:
+        with open(dest, 'wb') as f:
+            for chunk in r.iter_content(chunk_size=8192):
+                f.write(chunk)
+    else:
+        print(f"Failed to download {url} (Status: {r.status_code})")
+
+def main():
+    for name, filename in MODELS.items():
+        if filename in LANG_PATHS:
+            path = LANG_PATHS[filename]
+            # Download .onnx
+            onnx_url = f"{BASE_URL}/{path}"
+            download_file(onnx_url, os.path.join(MODELS_DIR, filename))
+            # Download .json config
+            json_url = f"{onnx_url}.json"
+            download_file(json_url, os.path.join(MODELS_DIR, f"{filename}.json"))
+
+    # Special case for Kannada (using community model if available or placeholder)
+    print("\nNote: Kannada (kn_IN) models may need to be source separately if not in main Piper repo.")
+    print("Suggested: https://github.com/braille-projects/piper-voices-kannada")
+
+if __name__ == "__main__":
+    main()

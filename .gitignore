@@ -1,0 +1,7 @@
+venv/
+__pycache__/
+*.pyc
+*.onnx
+Novabot_Multilingual.zip
+.env
+.gemini/
