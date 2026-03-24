@@ -15,11 +15,20 @@ fi
 echo "🔗 Activating virtual environment..."
 source venv/bin/activate
 
-# Install requirements
+# Check for .env file
+if [ ! -f ".env" ]; then
+    echo "⚠️ Warning: .env file NOT found! Please create it with GROQ_API_KEY."
+fi
+
+# Pre-flight check for Piper
+if [ ! -d "piper" ] || [ ! -x "$(find piper -name piper -type f -executable | head -n 1)" ]; then
+    echo "⚠️ Warning: Piper binary not found or not executable. Audio might fail."
+fi
+
+# Install requirements (only if venv is new or requested)
 if [ -f "requirements.txt" ]; then
-    echo "📥 Installing dependencies (this may take a minute)..."
-    pip install --upgrade pip
-    pip install -r requirements.txt
+    echo "📥 Checking dependencies..."
+    pip install -r requirements.txt --quiet
 else
     echo "⚠️ Warning: requirements.txt not found!"
 fi
