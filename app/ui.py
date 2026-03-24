@@ -220,5 +220,9 @@ class NovabotUI(ScreenManager):
     def display_question(self, text):
         self.main.question_label.text = text
 
+class KidsApp(App):
+    def build(self):
+        return NovabotUI()
+
 if __name__ == "__main__":
     KidsApp().run()
