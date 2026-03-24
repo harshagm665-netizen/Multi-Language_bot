@@ -10,10 +10,12 @@ os.makedirs(MODELS_DIR, exist_ok=True)
 MODELS = {
     "English (US)": "en_US-amy-low.onnx",
     "English (India)": "en_IN-kavya-medium.onnx",
-    "Hindi": "hi_IN-priyamvada-medium.onnx",
+    "Hindi": "hi_IN-rohan-medium.onnx",
     "Tamil": "ta_IN-tamil_female-medium.onnx",
     "Malayalam": "ml_IN-meera-medium.onnx",
     "Kannada": "kn_IN-kannada_male-medium.onnx",
+    "Telugu": "te_IN-maya-medium.onnx",
+    "Marathi": "mr_IN-google-medium.onnx",
     "Spanish": "es_ES-sharvard-medium.onnx",
     "French": "fr_FR-siwis-low.onnx"
 }
@@ -23,8 +25,10 @@ MODEL_URLS = {
     # Official Piper voices
     "en_US-amy-low.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/amy/low/en_US-amy-low.onnx",
     "en_IN-kavya-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_IN/kavya/medium/en_IN-kavya-medium.onnx",
-    "hi_IN-priyamvada-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/hi/hi_IN/priyamvada/medium/hi_IN-priyamvada-medium.onnx",
+    "hi_IN-rohan-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/hi/hi_IN/rohan/medium/hi_IN-rohan-medium.onnx",
     "ml_IN-meera-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/ml/ml_IN/meera/medium/ml_IN-meera-medium.onnx",
+    "te_IN-maya-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/te/te_IN/maya/medium/te_IN-maya-medium.onnx",
+    "mr_IN-google-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/mr/mr_IN/google/medium/mr_IN-google-medium.onnx",
     "es_ES-sharvard-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/es/es_ES/sharvard/medium/es_ES-sharvard-medium.onnx",
     "fr_FR-siwis-low.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/fr/fr_FR/siwis/low/fr_FR-siwis-low.onnx",
    

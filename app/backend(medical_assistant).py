@@ -77,10 +77,12 @@ class VoiceAssistant:
         self.language_models = {
             "English": "en_US-amy-low.onnx",
             "English_India": "en_IN-kavya-medium.onnx",
-            "Hindi": "hi_IN-priyamvada-medium.onnx",
+            "Hindi": "hi_IN-rohan-medium.onnx",
             "Kannada": "kn_IN-kannada_male-medium.onnx",
             "Tamil": "ta_IN-tamil_female-medium.onnx",
             "Malayalam": "ml_IN-meera-medium.onnx",
+            "Telugu": "te_IN-maya-medium.onnx",
+            "Marathi": "mr_IN-google-medium.onnx",
             "Spanish": "es_ES-sharvard-medium.onnx",
             "French": "fr_FR-siwis-low.onnx"
         }
@@ -1512,8 +1514,10 @@ class VoiceAssistant:
     def _detect_language_model(self, text):
         """Automatically switch Piper model based on detected script."""
         has_hindi = any('\u0900' <= c <= '\u097F' for c in text)
+        has_marathi = any(c == '\u0933' for c in text)  # Unique Marathi 'LLA' character
         has_tamil = any('\u0B80' <= c <= '\u0BFF' for c in text)
         has_kannada = any('\u0C80' <= c <= '\u0CFF' for c in text)
+        has_telugu = any('\u0C00' <= c <= '\u0C7F' for c in text)
         has_malayalam = any('\u0D00' <= c <= '\u0D7F' for c in text)
         
         # Spanish detection: Look for unique characters (ñ, ¿, ¡, accented vowels)
@@ -1522,8 +1526,12 @@ class VoiceAssistant:
 
         model = "en_US-amy-low.onnx"  # Default
         
-        if has_hindi:
-            model = "hi_IN-priyamvada-medium.onnx"
+        if has_telugu:
+            model = "te_IN-maya-medium.onnx"
+        elif has_marathi:
+            model = "mr_IN-google-medium.onnx"
+        elif has_hindi:
+            model = "hi_IN-rohan-medium.onnx"
         elif has_tamil:
             model = "ta_IN-tamil_female-medium.onnx"
         elif has_kannada:
@@ -1646,7 +1654,8 @@ class VoiceAssistant:
             You are NOVA, a friendly and helpful female medical assistant.
             
             IMPORTANT: Always respond in the SAME language the user speaks to you. 
-            If you speak in Hindi, Tamil, Kannada, or Malayalam, you MUST use the NATIVE SCRIPT (e.g., Devanagari for Hindi, Kannada script for Kannada). 
+            Supported: English, Hindi, Tamil, Kannada, Malayalam, Telugu, Marathi, Spanish.
+            If you speak in an Indian language, you MUST use the NATIVE SCRIPT (e.g., Devanagari for Hindi/Marathi, Telugu script for Telugu). 
             If you speak in Spanish, you MUST use standard Spanish and include any necessary unique characters (ñ, ¿, ¡).
             NEVER use Romanized English (like 'Namaskara') for Indian languages.
             Always use the actual script so the system can detect the language correctly.
