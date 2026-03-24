@@ -1,11 +1,11 @@
 # main.py
 from kivy.app import App
-from app.ui import KidsUI  # Your Kivy UI class (inherits from FloatLayout)
+from app.ui import NovabotUI
 
 class KidsApp(App):
     def build(self):
         # Return your UI layout
-        return KidsUI()
+        return NovabotUI()
 
 if __name__ == "__main__":
     KidsApp().run()
