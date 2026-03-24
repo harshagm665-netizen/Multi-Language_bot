@@ -34,36 +34,12 @@ class VoiceAssistant:
         self.on_speak = on_speak
         self.on_question = on_question
 
-        # --- Load API Key ---
-        env_path = os.path.join(PROJECT_ROOT, ".env")
-        load_dotenv(env_path)
-        self.api_key = os.getenv("GROQ_API_KEY", "").strip()
-        
-        # Manual fallback if load_dotenv fails
-        if not self.api_key and os.path.exists(env_path):
-            try:
-                with open(env_path, "r") as f:
-                    for line in f:
-                        if line.strip().startswith("GROQ_API_KEY="):
-                            self.api_key = line.split("=", 1)[1].strip().strip("'").strip('"')
-                            break
-            except Exception as e:
-                print(f"⚠ Manual .env read failed: {e}")
-
-        if not self.api_key:
-            print(f"⚠ ERROR: GROQ_API_KEY missing in {env_path}")
-        else:
-            print(f"✔ Groq API Key loaded (starts with {self.api_key[:4]}...)")
+        # --- Load and Validate API Key ---
+        self._load_api_key(PROJECT_ROOT)
+        self._check_api_configuration()
 
         # --- Piper Executable Discovery ---
-        self.PIPER_EXE = os.path.join(PROJECT_ROOT, "piper", "piper")
-        if not os.path.exists(self.PIPER_EXE):
-            # Try build folder fallback
-            fallback = os.path.join(PROJECT_ROOT, "piper", "build", "piper")
-            if os.path.exists(fallback):
-                self.PIPER_EXE = fallback
-            else:
-                print(f"⚠ Warning: Piper executable not found at {self.PIPER_EXE} or {fallback}")
+        self._discover_piper(PROJECT_ROOT)
 
         # -------------------
         # Audio / model paths
@@ -93,8 +69,8 @@ class VoiceAssistant:
             "English": "en_US-amy-low.onnx",
             "South English": "en_GB-southern_english_female-low.onnx",
             "Hindi": "hi_IN-pratham-medium.onnx",
-            "Kannada": "kn_IN-dharwad-medium.onnx",
-            "Tamil": "ta_IN-roja-medium.onnx",
+            "Kannada": "kn_IN-kannada_male-medium.onnx",
+            "Tamil": "ta_IN-tamil_female-medium.onnx",
             "Malayalam": "ml_IN-arjun-medium.onnx",
             "French": "fr_FR-siwis-low.onnx",
             "Spanish": "es_ES-carlfm-x_low.onnx"
@@ -471,6 +447,93 @@ class VoiceAssistant:
 
         return text.strip()
 
+
+    def _load_api_key(self, project_root):
+        """Hardened .env loading with manual fallback and encoding safety."""
+        env_path = os.path.join(project_root, ".env")
+        load_dotenv(env_path)
+        self.api_key = os.getenv("GROQ_API_KEY", "").strip()
+        
+        if not self.api_key and os.path.exists(env_path):
+            try:
+                # UTF-8 with BOM handling
+                import codecs
+                with codecs.open(env_path, "r", encoding="utf-8-sig") as f:
+                    for line in f:
+                        clean_line = line.strip()
+                        if clean_line.startswith("GROQ_API_KEY="):
+                            raw_val = clean_line.split("=", 1)[1].strip()
+                            # Strip common wrapper quotes
+                            self.api_key = raw_val.strip("'").strip('"').strip()
+                            break
+            except Exception as e:
+                print(f"⚠ Senior Debug: Manual .env read failed: {e}")
+
+    def _check_api_configuration(self):
+        """Validate API key metadata without exposing the secret."""
+        if not self.api_key:
+            print("❌ Senior Debug: GROQ_API_KEY is EMPTY")
+            return
+        
+        print(f"🔍 Senior Debug: API Key Metadata:")
+        print(f"   - Length: {len(self.api_key)} chars")
+        print(f"   - Prefix: {self.api_key[:4]}...")
+        print(f"   - Suffix: ...{self.api_key[-4:]}")
+        
+        if not self.api_key.startswith("gsk_"):
+            print("   ⚠️ WARNING: Key does not start with typical 'gsk_' prefix")
+        if any(c in self.api_key for c in [' ', '\r', '\n', '\t']):
+            print("   ⚠️ WARNING: Key contains hidden whitespace/control characters!")
+
+    def _discover_piper(self, project_root):
+        """Strict validation of Piper binary with diagnostic listing on failure."""
+        possible_paths = [
+            os.path.join(project_root, "piper", "piper"),
+            os.path.join(project_root, "piper", "build", "piper"),
+            os.path.join(project_root, "piper", "build", "piper", "piper")
+        ]
+        
+        self.PIPER_EXE = None
+        for path in possible_paths:
+            if os.path.isfile(path):
+                if os.access(path, os.X_OK):
+                    self.PIPER_EXE = path
+                    print(f"✔ Piper found and executable: {path}")
+                    break
+                else:
+                    print(f"⚠️ Piper found but NOT EXECUTABLE: {path}")
+        
+        if not self.PIPER_EXE:
+            print(f"❌ Senior Debug: Piper discovery failed in {project_root}")
+            print("🔍 Listing 'piper/' directory contents for context:")
+            piper_dir = os.path.join(project_root, "piper")
+            if os.path.exists(piper_dir):
+                try:
+                    for root, dirs, files in os.walk(piper_dir):
+                        level = root.replace(piper_dir, '').count(os.sep)
+                        indent = ' ' * 4 * (level)
+                        print(f"{indent}{os.path.basename(root)}/")
+                        subindent = ' ' * 4 * (level + 1)
+                        for f in files:
+                            f_path = os.path.join(root, f)
+                            exec_flag = "[EXE]" if os.access(f_path, os.X_OK) else ""
+                            print(f"{subindent}{f} {exec_flag}")
+                except Exception as e:
+                    print(f"   (Could not list directory: {e})")
+            else:
+                print(f"   ⚠️ Directory {piper_dir} DOES NOT EXIST")
+            
+            # Default to first possible path to avoid crashes later, 
+            # though it will likely fail on run.
+            self.PIPER_EXE = possible_paths[0]
+
+    def clean_text(self, text):
+        """Cleans response text for TTS."""
+        import re
+        text = re.sub(r'[*#_`~>]', ' ', text)
+        text = re.sub(r'\(.*?\)', ' ', text)
+        text = re.sub(r'\[.*?\]', ' ', text)
+        return text.strip()
 
     def clean_child_text(self, text: str) -> str:
         """
