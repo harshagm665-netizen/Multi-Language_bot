@@ -1,9 +1,9 @@
 #!/bin/bash
 # Novabot - Startup Script for Raspberry Pi
 
-# Navigate to the project directory
-PROJECT_DIR="/home/nova/Documents/Novabot"
-cd "$PROJECT_DIR" || { echo "❌ Error: Project directory not found at $PROJECT_DIR"; exit 1; }
+# Navigate to the project directory (directory of the script)
+PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$PROJECT_DIR" || { echo "❌ Error: Project directory not found"; exit 1; }
 
 # Activate virtual environment
 if [ -f "venv/bin/activate" ]; then
