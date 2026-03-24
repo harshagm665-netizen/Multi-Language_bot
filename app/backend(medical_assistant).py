@@ -1082,7 +1082,7 @@ class VoiceAssistant:
         
         import os, subprocess, time
 
-        file_path = "/home/nova/Documents/Novabot/wheels_on_bus.mp3"
+        file_path = os.path.join(PROJECT_ROOT, "wheels_on_bus.mp3")
 
         if not os.path.exists(file_path):
             print("❌ Rhyme file missing")
