@@ -6,29 +6,25 @@ import json
 MODELS_DIR = "piper/models"
 os.makedirs(MODELS_DIR, exist_ok=True)
 
-# Language -> Model Filenames mapping
+# Language -> Model Filenames mapping (Synchronized with backend.py)
 MODELS = {
     "English (US)": "en_US-amy-low.onnx",
-    "English (India)": "en_GB-southern_english_female-low.onnx",
     "Hindi": "hi_IN-pratham-medium.onnx",
-    "Tamil": "ta_IN-roja-medium.onnx",
-    "Malayalam": "ml_IN-arjun-medium.onnx",
-    "French": "fr_FR-siwis-low.onnx",
-    "Spanish": "es_ES-carlfm-x_low.onnx"
+    "Tamil": "ta_IN-tamil_female-medium.onnx",
+    "Kannada": "kn_IN-kannada_male-medium.onnx",
+    "Malayalam": "ml_IN-arjun-medium.onnx"
 }
 
 # Base URL for rhasspy piper voices
 BASE_URL = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0"
 
-# Specific language paths in the repo
+# Direct URLs or relative paths in rhasspy repo
 LANG_PATHS = {
     "en_US-amy-low.onnx": "en/en_US/amy/low/en_US-amy-low.onnx",
-    "en_GB-southern_english_female-low.onnx": "en/en_GB/southern_english_female/low/en_GB-southern_english_female-low.onnx",
     "hi_IN-pratham-medium.onnx": "hi/hi_IN/pratham/medium/hi_IN-pratham-medium.onnx",
-    "ta_IN-roja-medium.onnx": "COMMUNITY:ezhilkumaran/piper-tamil/resolve/main/ta_IN-roja-medium.onnx",
+    "ta_IN-tamil_female-medium.onnx": "COMMUNITY:ezhilkumaran/piper-tamil/resolve/main/ta_IN-roja-medium.onnx", # Redirected to Roja
+    "kn_IN-kannada_male-medium.onnx": "COMMUNITY:braille-projects/piper-voices-kannada/resolve/main/kn_IN-kannada_male-medium.onnx",
     "ml_IN-arjun-medium.onnx": "ml/ml_IN/arjun/medium/ml_IN-arjun-medium.onnx",
-    "fr_FR-siwis-low.onnx": "fr/fr_FR/siwis/low/fr_FR-siwis-low.onnx",
-    "es_ES-carlfm-x_low.onnx": "es/es_ES/carlfm/x_low/es_ES-carlfm-x_low.onnx",
 }
 
 def download_file(url, dest):
