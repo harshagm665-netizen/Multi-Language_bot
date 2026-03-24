@@ -15,89 +15,6 @@ from app.backend import VoiceAssistant
 # Fullscreen & dark blue background settings
 Window.fullscreen = True
 
-class WelcomeScreen(Screen):
-    def __init__(self, on_start_callback, on_lang_change, **kwargs):
-        super().__init__(**kwargs)
-        self.on_start_callback = on_start_callback
-        self.on_lang_change = on_lang_change
-        self.selected_lang = "English"
-
-        with self.canvas.before:
-            Color(0.05, 0.05, 0.2, 1)  # Dark blue
-            self.rect = Rectangle(pos=(0,0), size=Window.size)
-        Window.bind(size=self.update_rect)
-
-        # Main Layout
-        layout = FloatLayout()
-
-        # Title
-        layout.add_widget(Label(
-            text="Novabot: Choose Your Language",
-            font_size='40sp',
-            bold=True,
-            pos_hint={"center_x": 0.5, "center_y": 0.85}
-        ))
-
-        # Language Grid
-        grid = GridLayout(cols=4, spacing=15, size_hint=(0.8, 0.4), pos_hint={"center_x": 0.5, "center_y": 0.5})
-        languages = [
-            "Hindi", "Kannada", "Tamil", "Malayalam", 
-            "French", "Spanish", "English", "South English"
-        ]
-        
-        self.lang_buttons = {}
-        for lang in languages:
-            btn = Button(
-                text=lang,
-                background_normal='',
-                background_color=(0.1, 0.4, 0.8, 1),
-                font_size='20sp',
-                bold=True
-            )
-            btn.bind(on_release=lambda instance, l=lang: self.select_language(l))
-            grid.add_widget(btn)
-            self.lang_buttons[lang] = btn
-
-        layout.add_widget(grid)
-
-        # Start Button
-        self.start_btn = Button(
-            text="START BOT",
-            size_hint=(0.3, 0.12),
-            pos_hint={"center_x": 0.5, "center_y": 0.2},
-            background_normal='',
-            background_color=(0, 0.8, 0.2, 1),
-            font_size='25sp',
-            bold=True
-        )
-        self.start_btn.bind(on_release=lambda x: self.on_start_callback())
-        layout.add_widget(self.start_btn)
-
-        # Exit Button
-        exit_btn = Button(
-            text="EXIT",
-            size_hint=(None, None),
-            size=(100, 50),
-            pos_hint={"right": 0.98, "top": 0.98},
-            background_color=(0.8, 0.1, 0.1, 1)
-        )
-        exit_btn.bind(on_release=lambda x: App.get_running_app().stop())
-        layout.add_widget(exit_btn)
-
-        self.add_widget(layout)
-
-    def update_rect(self, *args):
-        self.rect.size = Window.size
-
-    def select_language(self, lang):
-        self.selected_lang = lang
-        # Visual feedback
-        for l, btn in self.lang_buttons.items():
-            btn.background_color = (0.1, 0.4, 0.8, 1) # Reset
-        self.lang_buttons[lang].background_color = (1, 0.6, 0, 1) # Highlight
-        
-        # Notify backend
-        self.on_lang_change(lang)
 
 class MainAssistantScreen(Screen):
     def __init__(self, **kwargs):
@@ -138,15 +55,12 @@ class MainAssistantScreen(Screen):
         self.layout.add_widget(self.question_frame)
 
         # --- Navigation Buttons ---
-        nav_bar = BoxLayout(size_hint=(1, 0.08), pos_hint={"top": 1}, padding=10, spacing=Window.width - 250)
-        
-        back_btn = Button(text="BACK", size_hint=(None, 1), width=100, background_color=(0.5, 0.5, 0.5, 1))
-        back_btn.bind(on_release=self.go_back)
+        nav_bar = BoxLayout(size_hint=(1, 0.08), pos_hint={"top": 1}, padding=10)
+        nav_bar.add_widget(BoxLayout()) # Spacer
         
         exit_btn = Button(text="EXIT", size_hint=(None, 1), width=100, background_color=(0.8, 0.1, 0.1, 1))
         exit_btn.bind(on_release=lambda x: App.get_running_app().stop())
 
-        nav_bar.add_widget(back_btn)
         nav_bar.add_widget(exit_btn)
         self.layout.add_widget(nav_bar)
 
@@ -160,9 +74,6 @@ class MainAssistantScreen(Screen):
         self.q_bg.pos = instance.pos
         self.q_bg.size = instance.size
 
-    def go_back(self, *args):
-        self.manager.transition = FadeTransition()
-        self.manager.current = 'welcome'
 
     def animate(self, dt):
         for grp in self.bubble_groups:
@@ -192,14 +103,12 @@ class NovabotUI(ScreenManager):
             on_question=self.display_question
         )
 
-        # Create Screens
-        self.welcome = WelcomeScreen(name='welcome', 
-                                   on_start_callback=self.start_interaction,
-                                   on_lang_change=self.change_language)
+        # Create the Interaction Screen directly
         self.main = MainAssistantScreen(name='interaction')
-
-        self.add_widget(self.welcome)
         self.add_widget(self.main)
+        
+        # Start in interaction mode
+        self.current = self.main.name
 
         # Thread for engine
         threading.Thread(target=self.assistant.run, daemon=True).start()

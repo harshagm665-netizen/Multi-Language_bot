@@ -34,6 +34,15 @@ class VoiceAssistant:
         self.on_speak = on_speak
         self.on_question = on_question
 
+        # --- State Initialization (Senior Design) ---
+        self.api_key = ""
+        self.PIPER_EXE = ""
+        self.PIPER_MODEL = ""
+        self.running = True
+        self.listening = False
+        self.is_busy = False
+        self.mic_stream = None
+
         # --- Load and Validate API Key ---
         self._load_api_key(PROJECT_ROOT)
         self._check_api_configuration()
@@ -1086,10 +1095,9 @@ class VoiceAssistant:
         if not sentence:
             return
 
-        # ✅ PRINT THE SPOKEN SENTENCE
         print(f"\n🔊 Speaking → {sentence}\n")
-
-        # IMPORTANT: mic already stopped by caller
+        self._detect_language_model(sentence)
+        
         raw_gen = self._piper_raw_generator_for_text(sentence)
         if raw_gen is None:
             return
@@ -1508,9 +1516,42 @@ class VoiceAssistant:
     # ---------------------------------------------------------
     # Main loop — listens, filters, stops mic, streams LLM + TTS
     # ---------------------------------------------------------
-    def run(self):
-        while self.running:
+    def _detect_language_model(self, text):
+        """Automatically switch Piper model based on detected script."""
+        has_hindi = any('\u0900' <= c <= '\u097F' for c in text)
+        has_tamil = any('\u0B80' <= c <= '\u0BFF' for c in text)
+        has_kannada = any('\u0C80' <= c <= '\u0CFF' for c in text)
+        has_malayalam = any('\u0D00' <= c <= '\u0D7F' for c in text)
+        
+        base_dir = os.path.dirname(self.PIPER_MODEL)
+        
+        if has_hindi:
+            model = "hi_IN-pratham-medium.onnx"
+        elif has_tamil:
+            model = "ta_IN-tamil_female-medium.onnx"
+        elif has_kannada:
+            model = "kn_IN-kannada_male-medium.onnx"
+        elif has_malayalam:
+            model = "ml_IN-arjun-medium.onnx"
+        else:
+            model = "en_US-amy-low.onnx"
+            
+        new_path = os.path.join(base_dir, model)
+        if os.path.exists(new_path):
+            if self.PIPER_MODEL != new_path:
+                print(f"🔄 Auto-switching TTS model to: {model}")
+                self.PIPER_MODEL = new_path
 
+    def run(self):
+        # --- Startup Greeting with UX delay ---
+        print("🕒 Novabot Medical Assistant initializing (2s delay)...")
+        time.sleep(2) 
+        greeting = "Hello, I am Nova. I am your medical assistant. How can I help you today?"
+        print(f"🔊 Startup Greeting → {greeting}")
+        self._detect_language_model(greeting)
+        self.speak_sentence_stream(greeting)
+        
+        while self.running:
             self.start_mic()
             print("Listening!!!")
             text = self.listen_until_silence()
