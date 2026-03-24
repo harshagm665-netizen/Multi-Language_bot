@@ -25,14 +25,20 @@ from pytrends.request import TrendReq
 import yfinance as yf
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-load_dotenv(os.path.join(PROJECT_ROOT, ".env"))
-GROQ_API_KEY = os.getenv("GROQ_API_KEY").strip() if os.getenv("GROQ_API_KEY") else None
 
 class VoiceAssistant:
     def __init__(self, on_listen, on_speak, on_question=None):
         self.on_listen = on_listen
         self.on_speak = on_speak
         self.on_question = on_question
+
+        # --- Load API Key ---
+        load_dotenv(os.path.join(PROJECT_ROOT, ".env"))
+        self.api_key = os.getenv("GROQ_API_KEY", "").strip()
+        if not self.api_key:
+            print(f"⚠ ERROR: GROQ_API_KEY missing in {os.path.join(PROJECT_ROOT, '.env')}")
+        else:
+            print(f"✔ Groq API Key loaded (starts with {self.api_key[:4]}...)")
 
         # -------------------
         # Audio / model paths
@@ -1106,7 +1112,7 @@ class VoiceAssistant:
 
             url = "https://api.groq.com/openai/v1/audio/transcriptions"
             headers = {
-                "Authorization": f"Bearer {GROQ_API_KEY}"
+                "Authorization": f"Bearer {self.api_key}"
             }
 
             for attempt in range(3):
@@ -1165,7 +1171,7 @@ class VoiceAssistant:
         url = "https://api.groq.com/openai/v1/chat/completions"
 
         headers = {
-            "Authorization": f"Bearer {GROQ_API_KEY}",
+            "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
         }
 
