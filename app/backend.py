@@ -58,10 +58,10 @@ class VoiceAssistant:
         self.language_code = "en"
         self.language_models = {
             "English": "en_US-amy-low.onnx",
-            "South English": "en_IN-gcount-medium.onnx",
+            "South English": "en_GB-southern_english_female-low.onnx",
             "Hindi": "hi_IN-pratham-medium.onnx",
             "Kannada": "kn_IN-dharwad-medium.onnx",
-            "Tamil": "ta_IN-periyar-medium.onnx",
+            "Tamil": "ta_IN-periyar-medium.onnx",  # Requires manual download
             "Malayalam": "ml_IN-arjun-medium.onnx",
             "French": "fr_FR-siwis-low.onnx",
             "Spanish": "es_ES-carlfm-x_low.onnx"
