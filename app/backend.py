@@ -24,8 +24,9 @@ from bs4 import BeautifulSoup
 from pytrends.request import TrendReq
 import yfinance as yf
 
-load_dotenv()
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+load_dotenv(os.path.join(PROJECT_ROOT, ".env"))
+GROQ_API_KEY = os.getenv("GROQ_API_KEY").strip() if os.getenv("GROQ_API_KEY") else None
 
 class VoiceAssistant:
     def __init__(self, on_listen, on_speak, on_question=None):
@@ -132,7 +133,7 @@ class VoiceAssistant:
                 "French": "fr", "Spanish": "es"
             }
             self.language_code = lang_map.get(language_name, "en")
-            self.PIPER_MODEL = os.path.join("/home/nova/Documents/Novabot/piper/models", self.language_models[language_name])
+            self.PIPER_MODEL = os.path.join(PROJECT_ROOT, "piper", "models", self.language_models[language_name])
             print(f"🌐 Language switched to: {self.language} (Model: {self.PIPER_MODEL})")
             
             # Confirmation message
@@ -793,7 +794,7 @@ class VoiceAssistant:
         Piper returns signed 16-bit LE PCM at 22050Hz by default with --output_raw.
         """
         piper_cmd = [
-            "/home/nova/Documents/Novabot/piper/build/piper",  # binary path
+            os.path.join(PROJECT_ROOT, "piper", "build", "piper"),  # binary path
             "--model",
             self.PIPER_MODEL,                          # e.g., "models/en_US-amy-low.onnx"
             "--output_raw"                              # outputs raw audio (or use --output_file for WAV)
