@@ -42,7 +42,8 @@ class VoiceAssistant:
         self.audio_q = queue.Queue(maxsize=200)   # holds raw int16 chunks (48k)
         
         # # ---- VOSK MODEL ----
-        self.VOSK_MODEL_PATH = "/home/nova/Documents/Novabot/model/vosk-model-small-en-in-0.4"
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        self.VOSK_MODEL_PATH = os.path.join(base_dir, "model", "vosk-model-small-en-in-0.4")
 
         if not os.path.exists(self.VOSK_MODEL_PATH):
             raise FileNotFoundError(f"Vosk model not found: {self.VOSK_MODEL_PATH}")
@@ -67,7 +68,7 @@ class VoiceAssistant:
             "Spanish": "es_ES-carlfm-x_low.onnx"
         }
         
-        self.PIPER_MODEL = os.path.join("/home/nova/Documents/Novabot/piper/models", self.language_models[self.language])
+        self.PIPER_MODEL = os.path.join(base_dir, "piper", "models", self.language_models[self.language])
 
         if not os.path.exists(self.PIPER_MODEL):
             print(f"⚠ Warning: Default Piper model missing: {self.PIPER_MODEL}")
