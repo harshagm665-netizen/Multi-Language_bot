@@ -4,7 +4,6 @@ sounddevice
 numpy
 python-dotenv
 requests
-webrtcvad
 scipy
 pyserial
 beautifulsoup4

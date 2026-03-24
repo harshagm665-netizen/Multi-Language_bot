@@ -17,7 +17,7 @@ import re
 import threading
 import serial
 import os
-import webrtcvad
+# import webrtcvad (unused, causes issues on 3.13)
 from scipy.signal import resample_poly
 from scipy.signal import butter, lfilter
 from dotenv import load_dotenv
