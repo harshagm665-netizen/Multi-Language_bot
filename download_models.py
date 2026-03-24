@@ -9,24 +9,24 @@ os.makedirs(MODELS_DIR, exist_ok=True)
 # Language -> Model Filenames mapping
 MODELS = {
     "English (US)": "en_US-amy-low.onnx",
-    "English (India)": "en_GB-southern_english_female-low.onnx",
-    "Hindi": "hi_IN-pratham-medium.onnx",
-    "Tamil": "ta_IN-tamil_female-medium.onnx",  # Changed to working model
-    "Malayalam": "ml_IN-arjun-medium.onnx",
-    "Kannada": "kn_IN-kannada_male-medium.onnx",  # Added Kannada
-    "French": "fr_FR-siwis-low.onnx",
-    "Spanish": "es_ES-carlfm-x_low.onnx"
+    "English (India)": "en_IN-kavya-medium.onnx",
+    "Hindi": "hi_IN-priyamvada-medium.onnx",
+    "Tamil": "ta_IN-tamil_female-medium.onnx",
+    "Malayalam": "ml_IN-meera-medium.onnx",
+    "Kannada": "kn_IN-kannada_male-medium.onnx",
+    "Spanish": "es_ES-sharvard-medium.onnx",
+    "French": "fr_FR-siwis-low.onnx"
 }
 
 # Direct download URLs for each model
 MODEL_URLS = {
     # Official Piper voices
     "en_US-amy-low.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/amy/low/en_US-amy-low.onnx",
-    "en_GB-southern_english_female-low.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_GB/southern_english_female/low/en_GB-southern_english_female-low.onnx",
-    "hi_IN-pratham-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/hi/hi_IN/pratham/medium/hi_IN-pratham-medium.onnx",
-    "ml_IN-arjun-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/ml/ml_IN/arjun/medium/ml_IN-arjun-medium.onnx",
+    "en_IN-kavya-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_IN/kavya/medium/en_IN-kavya-medium.onnx",
+    "hi_IN-priyamvada-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/hi/hi_IN/priyamvada/medium/hi_IN-priyamvada-medium.onnx",
+    "ml_IN-meera-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/ml/ml_IN/meera/medium/ml_IN-meera-medium.onnx",
+    "es_ES-sharvard-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/es/es_ES/sharvard/medium/es_ES-sharvard-medium.onnx",
     "fr_FR-siwis-low.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/fr/fr_FR/siwis/low/fr_FR-siwis-low.onnx",
-    "es_ES-carlfm-x_low.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/es/es_ES/carlfm/x_low/es_ES-carlfm-x_low.onnx",
    
     # Community Tamil model (simrat39)
     "ta_IN-tamil_female-medium.onnx": "https://huggingface.co/simrat39/tamil-piper-model/resolve/main/ta_IN-tamil_female-medium.onnx",

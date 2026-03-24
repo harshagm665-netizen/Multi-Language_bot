@@ -78,13 +78,13 @@ class VoiceAssistant:
         self.language_code = "en"
         self.language_models = {
             "English": "en_US-amy-low.onnx",
-            "South English": "en_GB-southern_english_female-low.onnx",
-            "Hindi": "hi_IN-pratham-medium.onnx",
+            "English_India": "en_IN-kavya-medium.onnx",
+            "Hindi": "hi_IN-priyamvada-medium.onnx",
             "Kannada": "kn_IN-kannada_male-medium.onnx",
             "Tamil": "ta_IN-tamil_female-medium.onnx",
-            "Malayalam": "ml_IN-arjun-medium.onnx",
-            "French": "fr_FR-siwis-low.onnx",
-            "Spanish": "es_ES-carlfm-x_low.onnx"
+            "Malayalam": "ml_IN-meera-medium.onnx",
+            "Spanish": "es_ES-sharvard-medium.onnx",
+            "French": "fr_FR-siwis-low.onnx"
         }
         
         # Default to English Female
@@ -1334,20 +1334,26 @@ class VoiceAssistant:
         has_kannada = any('\u0C80' <= c <= '\u0CFF' for c in text)
         has_malayalam = any('\u0D00' <= c <= '\u0D7F' for c in text)
         
-        base_dir = os.path.dirname(self.PIPER_MODEL)
+        # Spanish detection: Look for unique characters (ñ, ¿, ¡, accented vowels)
+        spanish_chars = set("¿¡ñáéíóúü")
+        has_spanish = any(c in spanish_chars for c in text.lower())
+
+        model = "en_US-amy-low.onnx"  # Default
         
         if has_hindi:
-            model = "hi_IN-pratham-medium.onnx"
+            model = "hi_IN-priyamvada-medium.onnx"
         elif has_tamil:
             model = "ta_IN-tamil_female-medium.onnx"
         elif has_kannada:
             model = "kn_IN-kannada_male-medium.onnx"
         elif has_malayalam:
-            model = "ml_IN-arjun-medium.onnx"
-        else:
-            # Default to Amy (English)
-            model = "en_US-amy-low.onnx"
-            
+            model = "ml_IN-meera-medium.onnx"
+        elif has_spanish:
+            model = "es_ES-sharvard-medium.onnx"
+        elif "en_in" in text.lower() or "indian" in text.lower():
+            model = "en_IN-kavya-medium.onnx"
+
+        base_dir = os.path.dirname(self.PIPER_MODEL)
         new_path = os.path.join(base_dir, model)
         if os.path.exists(new_path):
             if self.PIPER_MODEL != new_path:
@@ -1561,6 +1567,10 @@ class VoiceAssistant:
             You are NOVA, a friendly female Indian teacher for children.
 
             GENERAL RULES:
+            - Always respond in the SAME language the user speaks to you (English, Hindi, Tamil, Kannada, Malayalam, or Spanish).
+            - If you speak in Hindi, Tamil, Kannada, or Malayalam, you MUST use the NATIVE SCRIPT (e.g., Devanagari for Hindi, Tamil script for Tamil).
+            - If you speak in Spanish, you MUST use standard Spanish with correct punctuation (¿, ¡, ñ).
+            - NEVER use Romanized English (like 'Namaskara') for Indian languages.
             - Use child-friendly, simple language.
             - Keep answers short and direct for normal questions.
             - Use 1–2 sentences unless the question clearly needs more.
